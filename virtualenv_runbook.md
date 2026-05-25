@@ -17,24 +17,7 @@ setuptools 59.6.0
 wheel      0.37.1
 
 (ansible-community) lawi@dev:~/py_env$ pip install ansible
-
 (ansible-community) lawi@dev:~/py_env$ pip list
-Package           Version
------------------ -------
-ansible           10.7.0
-ansible-core      2.17.14
-cffi              2.0.0
-cryptography      48.0.0
-Jinja2            3.1.6
-MarkupSafe        3.0.3
-packaging         26.2
-pip               22.0.2
-pycparser         3.0
-PyYAML            6.0.3
-resolvelib        1.0.1
-setuptools        59.6.0
-typing_extensions 4.15.0
-wheel             0.37.1
 
 - ansible --version
 - ansible-community --version
@@ -46,3 +29,7 @@ wheel             0.37.1
 - pip3 list
 
 (ansible-core) lawi@dev:~/py_env$ pip install ansible-core
+(ansible-core) lawi@dev:~/py_env$ pip list
+
+- ansible --version
+- ansible-community --version # Expected command not found
