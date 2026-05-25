@@ -7,14 +7,6 @@
 - cd py_venv/
 - virtualenv -p python3.10 ansible-community
 - source ansible-community/bin/activate
-- pip3 list 
-
-(ansible-community) lawi@dev:~/py_env$ pip3 list
-Package    Version
----------- -------
-pip        22.0.2
-setuptools 59.6.0
-wheel      0.37.1
 
 (ansible-community) lawi@dev:~/py_env$ pip install ansible
 (ansible-community) lawi@dev:~/py_env$ pip list
