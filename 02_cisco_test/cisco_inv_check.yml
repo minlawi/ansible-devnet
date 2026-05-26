@@ -1,0 +1,14 @@
+---
+- hosts: routers
+  # gather_facts: false 
+  tasks:
+    - name: Print ansible config location
+      ansible.builtin.debug:
+         msg:
+          - "{{ ansible_config_file }}"
+          - "{{ inventory_file }}"
+          - "{{ ansible_facts }}"
+
+          # - "{{ ansible_facts['net_serialnum'] }}"
+          # - "System hostname: {{ inventory_hostname }}"
+          # - " {{ inventory_hostname }}'s serial number: {{ ansible_facts['net_serialnum'] }}"

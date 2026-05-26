@@ -1,0 +1,92 @@
+all:
+  children:
+    ce_routers:
+      hosts:
+        CE1-R9:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.9
+          ansible_network_os: cisco.ios.ios
+        CE2-R10:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.10
+          ansible_network_os: cisco.ios.ios
+        CE3-R11:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.11
+          ansible_network_os: cisco.ios.ios
+        CE4-R12:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.12
+          ansible_network_os: cisco.ios.ios
+        CE5-R13:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.13
+          ansible_network_os: cisco.ios.ios
+        CE6-R14:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.14
+          ansible_network_os: cisco.ios.ios
+        CE6-R16:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.16
+          ansible_network_os: cisco.ios.ios
+        CE7-R15:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.15
+          ansible_network_os: cisco.ios.ios
+    p_routers:
+      hosts:
+        P1-R1:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.1
+          ansible_network_os: cisco.ios.ios
+        P2-R2:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.2
+          ansible_network_os: cisco.ios.ios
+        P3-R3:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.3
+          ansible_network_os: cisco.ios.ios
+    pe_routers:
+      hosts:
+        PE1-R4:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.4
+          ansible_network_os: cisco.ios.ios
+        PE2-R5:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.5
+          ansible_network_os: cisco.ios.ios
+        PE3-R6:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.6
+          ansible_network_os: cisco.ios.ios
+        PE4-R7:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.7
+          ansible_network_os: cisco.ios.ios
+        PE5-R8:
+          ansible_connection: ansible.netcommon.network_cli
+          ansible_host: 1.1.1.8
+          ansible_network_os: cisco.ios.ios
+    routers:
+      children:
+        mpls_routers:
+          hosts:
+            CE1-R9: {}
+            CE2-R10: {}
+            CE3-R11: {}
+            CE4-R12: {}
+            CE5-R13: {}
+            CE6-R14: {}
+            CE6-R16: {}
+            CE7-R15: {}
+            P1-R1: {}
+            P2-R2: {}
+            P3-R3: {}
+            PE1-R4: {}
+            PE2-R5: {}
+            PE3-R6: {}
+            PE4-R7: {}
+            PE5-R8: {}
