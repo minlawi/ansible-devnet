@@ -1,0 +1,66 @@
+# This playbook collects interface data from Cisco routers and generates a CSV report with timestamps.
+# Playbook will dynamically detect the hosts in the 'routers' group so you can easily add or remove devices
+# in the inventory folder (inventory/cisco_devices.ini) without modifying the playbook.
+
+
+################################
+# P{number}: Play1, Play2, etc.#
+# T{number}: Task1, Task2, etc.#
+################################
+
+---
+# P1: Collect data from routers
+- name: Collect Router Data
+  hosts: routers
+  gather_facts: false
+  tasks:
+
+    # P1T1: To collect interface data from each router using  the ios_command module
+    - name: Collect interface data
+      cisco.ios.ios_command:
+        commands:
+          - show ip interface brief | exclude down
+      register: ip_intf_result
+
+    # P1T2: Save the collected data to hostvars for later use in the CSV generation step
+    - name: Save results to hostvars
+      ansible.builtin.set_fact:
+        intf_data: "{{ ip_intf_result.stdout_lines }}"
+      delegate_to: localhost
+      become: false
+
+# P2: Generate CSV report on Ansible control node
+- name: Generate CSV Report
+  hosts: localhost
+  gather_facts: false
+  tasks:
+
+    # P2T1: Create a CSV file on the control node with the collected data from all routers
+    - name: Create CSV with all router data
+      ansible.builtin.shell: |
+        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+        CSV_FILE="/home/lawi/ansible-devnet/02_cisco_test/interface_results_${TIMESTAMP}.csv"
+        # Create fresh CSV with header
+        echo "Device,Interface,IP-Address,OK?,Method,Status,Protocol" > "$CSV_FILE"
+        # Add data from all routers
+        {% for host in groups['routers'] %}
+        {% if hostvars[host].intf_data is defined %}
+        {% for item in hostvars[host].intf_data %}
+        {% for line in item %}
+        {% if line and 'Interface' not in line %}
+        HOST="{{ host }}"
+        LINE="{{ line }}"
+        echo "$LINE" | awk -v h="$HOST" '{print h "," $1 "," $2 "," $3 "," $4 "," $5 "," $6}' >> "$CSV_FILE"
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
+        {% endif %}
+        {% endfor %}
+        echo "Created: $CSV_FILE"
+      register: csv_result
+      become: false
+
+    # P2T2: Display the location of the generated CSV file
+    - name: Show CSV file location
+      ansible.builtin.debug:
+        msg: "{{ csv_result.stdout_lines | last }}"
