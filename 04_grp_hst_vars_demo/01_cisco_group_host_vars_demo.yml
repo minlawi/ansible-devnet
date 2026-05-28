@@ -1,0 +1,13 @@
+---
+- name: Configure domain name
+  hosts: routers
+  tasks:
+    - name: Configure IP domain name
+      cisco.ios.ios_config:
+        lines: 
+          - ip domain name {{ ip_domain_name }}
+      register: ip_domain_output
+
+    - name: Print output
+      ansible.builtin.debug:
+        msg: "{{ ip_domain_output }}"
