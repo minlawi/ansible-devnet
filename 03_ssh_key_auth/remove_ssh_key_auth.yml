@@ -1,0 +1,29 @@
+---
+# This playbook removes SSH pubkey-chain configuration from routers
+
+- name: Remove SSH pubkey-chain configuration
+  hosts: routers
+  gather_facts: false
+  vars:
+    username_to_remove: "{{ target_user | default('ansible_admin') }}"
+  tasks:
+
+    - name: Remove ip ssh pubkey-chain configuration with username
+      cisco.ios.ios_config:
+        lines:
+          - no username {{ username_to_remove }}
+        parents:
+          - ip ssh pubkey-chain
+        save_when: never
+
+    - name: Remove {{ username_to_remove }} username from configuration
+      cisco.ios.ios_command:
+        commands:
+          - command: configure terminal
+          - command: no username {{ username_to_remove }}
+            prompt: Do you want to continue
+            answer: "y"
+
+    - name: Display result
+      ansible.builtin.debug:
+        msg: "SSH pubkey-chain configuration and username {{ username_to_remove }} removed from {{ actual_hostname }}"

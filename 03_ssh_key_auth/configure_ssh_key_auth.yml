@@ -1,0 +1,86 @@
+---
+# This playbook checks if the ansible_admin user exists on Cisco routers
+# If the user exists, it displays the configuration; if not, reports that the user is missing
+
+- name: Check if {{ username_to_manage }} user exists
+  hosts: routers
+  gather_facts: false
+  vars:
+    username_to_manage: "{{ target_user | default('ansible_admin') }}"
+  tasks:
+
+    - name: Check for {{ username_to_manage }} user in running config
+      cisco.ios.ios_command:
+        commands:
+          - show running-config | include username {{ username_to_manage }}
+      register: admin_user_check
+
+    - name: Display result for {{ username_to_manage }} user
+      ansible.builtin.debug:
+        msg: "{{ username_to_manage }} user {{ 'EXISTS' if admin_user_check.stdout[0] != '' else 'DOES NOT EXIST' }} on {{ actual_hostname }}"
+
+- name: Create {{ username_to_manage }} user with privilege 15 (for SSH key auth)
+  hosts: routers
+  gather_facts: false
+  vars:
+    username_to_manage: "{{ target_user | default('ansible_admin') }}"
+  tasks:
+
+    - name: Create {{ username_to_manage }} user with privilege 15
+      cisco.ios.ios_user:
+        name: "{{ username_to_manage }}"
+        privilege: 15
+        state: present
+      register: user_create_result
+      when: admin_user_check.stdout[0] == ''
+
+    - name: Display result
+      ansible.builtin.debug:
+        msg: "{{ username_to_manage }} user created on {{ actual_hostname }}"
+      when: admin_user_check.stdout[0] == ''
+
+    - name: Skip user creation
+      ansible.builtin.debug:
+        msg: "{{ username_to_manage }} user already exists, skipping creation on {{ actual_hostname }}"
+      when: admin_user_check.stdout[0] != ''
+
+- name: Configure SSH public key for {{ username_to_manage }}
+  hosts: routers
+  gather_facts: false
+  vars:
+    username_to_manage: "{{ target_user | default('ansible_admin') }}"
+    pubkey_path: "{{ lookup('env', 'HOME') }}/.ssh/cisco_rsa.pub"
+  tasks:
+
+    - name: Read SSH public key from control node
+      ansible.builtin.slurp:
+        src: "{{ pubkey_path }}"
+      become: false
+      delegate_to: localhost
+      register: pubkey_content
+
+    - name: Fold public key to 64 characters per line
+      ansible.builtin.set_fact:
+        folded_pubkey: "{{ pubkey_content.content | b64decode | regex_replace('(.{64})', '\\1\n') }}"
+
+    - name: Display folded public key (for verification)
+      ansible.builtin.debug:
+        msg: "{{ folded_pubkey }}"
+      delegate_to: localhost
+
+    - name: Configure SSH public key using pubkey-chain
+      cisco.ios.ios_config:
+        lines:
+          - username {{ username_to_manage }}
+          - key-string
+          - "{{ folded_pubkey }}"
+          - exit
+        parents:
+          - ip ssh pubkey-chain
+        after:
+          - exit
+        save_when: never
+
+    - name: Display SSH key configuration result
+      ansible.builtin.debug:
+        msg: "SSH public key configured for {{ username_to_manage }} on {{ actual_hostname }}"

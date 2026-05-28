@@ -1,0 +1,29 @@
+---
+# Check current SSH key configuration on routers
+
+- name: Check SSH pubkey-chain configuration
+  hosts: routers
+  gather_facts: false
+  vars:
+    username_to_manage: "{{ target_user | default('ansible_admin') }}"
+  tasks:
+
+    - name: Show SSH pubkey-chain configuration
+      cisco.ios.ios_command:
+        commands:
+          - show running-config | section ip ssh pubkey-chain
+      register: ssh_pubkey_config
+
+    - name: Display SSH key configuration
+      ansible.builtin.debug:
+        msg: "{{ ssh_pubkey_config.stdout[0] }}"
+
+    - name: Check for {{ username_to_manage }} user in running config
+      cisco.ios.ios_command:
+        commands:
+          - show running-config | include username {{ username_to_manage }}
+      register: admin_user_check
+
+    - name: Display result for {{ username_to_manage }} user
+      ansible.builtin.debug:
+        msg: "{{ username_to_manage }} user {{ 'EXISTS' if admin_user_check.stdout[0] != '' else 'DOES NOT EXIST' }} on {{ actual_hostname }}"
