@@ -1,0 +1,16 @@
+---
+- name: Cisco IOS facts demo
+  hosts: R1
+  # gather_facts: false
+
+  tasks:
+    - name: Gathering IOS facts
+      cisco.ios.ios_facts:
+        gather_subset: all
+        available_network_resources: true
+        gather_network_resources: l3_interfaces
+
+    - name: Displaying Ansible facts
+      ansible.builtin.debug:
+        msg: 
+         - "{{ ansible_facts }}"
