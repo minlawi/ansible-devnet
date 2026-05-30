@@ -1,0 +1,23 @@
+---
+- name: Play the iOS command demo
+  hosts: routers
+  gather_facts: no
+  tasks:
+    - name: Send command
+      cisco.ios.ios_command:
+        commands: 
+          - show version
+          - show ip interface brief
+        match: all
+        wait_for:
+          - result[0] contains "Cisco IOS Software"   ### Results come from Line 19
+          - result[1] contains "Protocol"             ### Results come from Line 23
+      register: show_cmd_output
+
+    - name: Print show version output
+      ansible.builtin.debug:
+        msg: "{{ show_cmd_output.stdout_lines[0] }}"  ### Output from Line 9
+
+    - name: Print show ip interface brief output
+      ansible.builtin.debug:
+        msg: "{{ show_cmd_output.stdout_lines[1] }}"  ### Output from Line 10

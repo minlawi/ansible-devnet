@@ -1,0 +1,33 @@
+---
+- name: Clear counters on active interfaces and verify
+  hosts: routers
+  gather_facts: no
+
+  tasks:
+    - name: Gather IOS facts (includes interface info)
+      cisco.ios.ios_facts:
+        gather_subset:
+          - interfaces
+
+    - name: Display gathered interface facts
+      debug:
+        msg: "{% if ansible_facts.net_interfaces[item].operstatus == 'administratively down' %}This interface is ADMIN DOWN.{% elif ansible_facts.net_interfaces[item].operstatus == 'down' %}This interface is DOWN.{% else %}This interface is UP.{% endif %}"
+      loop: "{{ ansible_facts.net_interfaces | list }}"
+      loop_control:
+        label: "{{ item }} : {{ ansible_facts.net_interfaces[item].description | default('no description', true) }}"
+
+    - name: Clear counters on active interfaces
+      cisco.ios.ios_command:
+        commands:
+          - command: "clear counters {{ item }}"
+            prompt:  'Clear "show interface" counters on this interface \[confirm\]'
+            answer:  "y"
+      loop: "{{ ansible_facts.net_interfaces | dict2items | selectattr('value.operstatus', 'equalto', 'up') | map(attribute='key') | list }}"
+      when: ansible_facts.net_interfaces is defined
+
+    - name: Verify counters are reset
+      cisco.ios.ios_command:
+        commands:
+          - "show interface {{ item }} | include rate"
+      loop: "{{ ansible_facts.net_interfaces | dict2items | selectattr('value.operstatus', 'equalto', 'up') | map(attribute='key') | list }}"
+      when: ansible_facts.net_interfaces is defined
