@@ -1,0 +1,25 @@
+---
+- name: Playing with ios_config module
+  hosts: routers
+  gather_facts: false
+
+  tasks:
+  # - name: Configure Interfaces with src file
+  #   cisco.ios.ios_config:
+  #     src: /home/lawi/ansible-devnet/templates/intf_config
+  #     save_when: modified
+  #   register: intf_result
+
+  - name: Configure GigabitEthernet Interfaces with src jinja2 file
+    cisco.ios.ios_config:
+      src: /home/lawi/ansible-devnet/templates/intf_config.j2
+      save_when: modified
+    with_items: "{{ interface_GigabitEthernet | default([]) }}"
+    register: intf_result
+
+  - name: Configure Loopback Interfaces with src jinja2 file
+    cisco.ios.ios_config:
+      src: /home/lawi/ansible-devnet/templates/intf_config.j2
+      save_when: modified
+    with_items: "{{ interface_loopback | default([]) }}"
+    register: loopback_result

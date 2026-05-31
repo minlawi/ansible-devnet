@@ -1,0 +1,3 @@
+interface GigabitEthernet0/1
+ description "To_R2_GigabitEthernet0/1"
+ ip address 10.1.12.1 255.255.255.252
