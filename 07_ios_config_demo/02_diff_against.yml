@@ -21,7 +21,7 @@
         lines: ip domain name yourdomain_diff.com ## Diff with golden config ## 
         diff_against: intended
         intended_config: "{{ lookup('file', '/home/lawi/ansible-devnet/golden_configs/{{ actual_hostname }}.cfg') }}"
-        save_when: changed
+        save_when: modified
       register: domain_result
 
     # - name: Get date/time after backup

@@ -1,0 +1,47 @@
+---
+- name: Playing with ios_config module
+  hosts: routers
+  gather_facts: false
+
+  tasks:
+  - name: Gather interface facts
+    cisco.ios.ios_facts:
+      gather_subset:
+        - interfaces
+
+  - name: Delete Loopback interfaces
+    cisco.ios.ios_config:
+      lines:
+        - no interface {{ item.name }}
+      save_when: modified
+    with_items: "{{ interface_loopback | default([]) }}"
+    when: "item.name in ansible_net_interfaces"
+    register: loopback_unconfigure_result
+    # ignore_errors: yes  # Commented out - using when clause to check if interface exists first
+
+  - name: Display result of interface deletion
+    ansible.builtin.debug:
+      msg:
+        - "{{ loopback_unconfigure_result }}"
+
+  - name: Default GigabitEthernet interfaces
+    cisco.ios.ios_config:
+      lines:
+        - default interface {{ item.name }}
+      save_when: modified
+    with_items: "{{ interface_GigabitEthernet | default([]) }}"
+    register: gigabitethernet_default_result
+
+  - name: Shutdown GigabitEthernet interfaces
+    cisco.ios.ios_config:
+      parents: "interface {{ item.name }}"
+      lines:
+        - shutdown
+      save_when: modified
+    with_items: "{{ interface_GigabitEthernet | default([]) }}"
+    register: gigabitethernet_unconfigure_result
+
+  - name: Display result of interface deletion
+    ansible.builtin.debug:
+      msg:
+        - "{{ gigabitethernet_unconfigure_result }}"

@@ -1,0 +1,12 @@
+---
+interface_loopback:
+  - name: Loopback0
+    ip: 4.4.4.4
+    mask: 255.255.255.255
+    desc: OSPF Router ID
+
+# interface_GigabitEthernet:
+#   - name: GigabitEthernet0/1
+#     ip: x.x.x.x
+#     mask: m.m.m.m
+#     desc: "To_RX_GigabitEthernetx/x"

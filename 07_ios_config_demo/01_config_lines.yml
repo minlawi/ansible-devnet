@@ -20,7 +20,7 @@
       cisco.ios.ios_config:
         lines:
           - ip domain name yourdomain.com
-        save_when: changed
+        save_when: modified
       register: domain_result
 
     - name: Get date/time after backup

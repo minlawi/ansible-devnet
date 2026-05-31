@@ -1,0 +1,36 @@
+---
+- name: Playing with ios_config module
+  hosts: routers
+  gather_facts: false
+
+  tasks:
+  - name: Configure Loopback interface settings
+    cisco.ios.ios_config:
+      lines:
+        - description "{{ item.desc }}"
+        - ip address {{ item.ip }} {{ item.mask }}
+      parents: interface {{ item.name }}
+      save_when: modified
+    with_items: "{{ interface_loopback | default([]) }}"
+    register: loopback_result
+
+  - name: Display result of Loopback interface configuration
+    ansible.builtin.debug:
+      msg:
+        - "{{ loopback_result }}"
+
+  - name: Configure GigabitEthernet interface settings
+    cisco.ios.ios_config:
+      lines:
+        - description "{{ item.desc }}"
+        - ip address {{ item.ip }} {{ item.mask }}
+        - no shutdown
+      parents: interface {{ item.name }}
+      save_when: modified
+    with_items: "{{ interface_GigabitEthernet | default([]) }}"
+    register: gigabitethernet_result
+
+  - name: Display result of GigabitEthernet interface configuration
+    ansible.builtin.debug:
+      msg:
+        - "{{ gigabitethernet_result }}"
