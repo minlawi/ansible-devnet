@@ -30,13 +30,20 @@ Add this line to your `/etc/ssh/ssh_config` file:
 PubkeyAcceptedKeyTypes +ssh-rsa
 ```
 
-### Step 3: Prepare Public Key
+### Step 3: Get the MD5 Hash of Your Public Key
 
-Fold the public key to 64 characters per line (required by Cisco IOS):
+Cisco IOS uses the MD5 hash of the SSH public key for authentication:
 
 ```bash
-fold -b -w 64 ~/.ssh/cisco_rsa.pub
+ssh-keygen -lf ~/.ssh/cisco_rsa.pub -E md5
 ```
+
+Example output:
+```
+3072 MD5:f7:bf:98:6f:8e:82:f4:24:bb:26:0a:6d:f1:88:e2:e7 lawi@dev (RSA)
+```
+
+Note the hash without colons: `f7bf986f8e82f424bb260a6df188e2e7`
 
 ### Step 4: Configure Network Device
 
@@ -46,11 +53,14 @@ For each network device, create a user and configure SSH key authentication:
 configure terminal
 ip ssh pubkey-chain
 username ansible_admin
-key-string
-<paste the folded public key here>
+key-hash ssh-rsa f7bf986f8e82f424bb260a6df188e2e7 lawi@dev
 exit
 exit
+end
+write memory
 ```
+
+**Important:** Replace the hash and comment with your actual values from Step 3.
 
 ## Method 2: Ansible Automation
 
@@ -68,18 +78,19 @@ Run the Ansible playbook to automatically configure SSH key authentication:
 
 **Default user (ansible_admin):**
 ```bash
-ansible-playbook 03_ssh_key_auth/configure_ssh_key_auth.yml
+ansible-playbook -i inventory/cisco_devices.ini 03_ssh_key_auth/configure_ssh_key_auth.yml
 ```
 
 **Custom user (e.g., lawi, network_admin, etc.):**
 ```bash
-ansible-playbook 03_ssh_key_auth/configure_ssh_key_auth.yml -e "target_user=lawi"
+ansible-playbook -i inventory/cisco_devices.ini 03_ssh_key_auth/configure_ssh_key_auth.yml -e "target_user=lawi"
 ```
 
 This playbook will:
 - Check if the user exists on network devices
 - Create the user with privilege level 15 if it doesn't exist
-- Configure the SSH public key using pubkey-chain
+- Calculate the MD5 hash of your SSH public key
+- Configure the SSH public key using `key-hash` format
 
 ### Step 4: Verify Configuration
 
@@ -87,12 +98,12 @@ Check if the user and SSH key are properly configured:
 
 **Check default user:**
 ```bash
-ansible-playbook 03_ssh_key_auth/check_ssh_key_auth.yml -i inventory/cisco_ssh_key_auth_inv.yml
+ansible-playbook -i inventory/cisco_devices.ini 03_ssh_key_auth/check_ssh_key_auth.yml
 ```
 
 **Check custom user:**
 ```bash
-ansible-playbook 03_ssh_key_auth/check_ssh_key_auth.yml -e "target_user=lawi" -i inventory/cisco_ssh_key_auth_inv.yml
+ansible-playbook -i inventory/cisco_devices.ini 03_ssh_key_auth/check_ssh_key_auth.yml -e "target_user=lawi"
 ```
 
 ### Step 5: Test SSH Key Authentication
@@ -117,12 +128,12 @@ To remove SSH key authentication and the user:
 
 **Remove default user:**
 ```bash
-ansible-playbook 03_ssh_key_auth/remove_ssh_key_auth.yml -i inventory/cisco_ssh_key_auth_inv.yml
+ansible-playbook -i inventory/cisco_devices.ini 03_ssh_key_auth/remove_ssh_key_auth.yml
 ```
 
 **Remove custom user:**
 ```bash
-ansible-playbook 03_ssh_key_auth/remove_ssh_key_auth.yml -e "target_user=lawi" -i inventory/cisco_ssh_key_auth_inv.yml
+ansible-playbook -i inventory/cisco_devices.ini 03_ssh_key_auth/remove_ssh_key_auth.yml -e "target_user=lawi"
 ```
 
 This will:
@@ -135,8 +146,7 @@ This will:
 
 1. **Verify SSH key configuration:**
    ```bash
-   ansible-playbook 03_ssh_key_auth/check_ssh_key_auth.yml
-   ansible-playbook 03_ssh_key_auth/check_ssh_key_auth.yml -e "target_user=lawi"
+   ansible-playbook -i inventory/cisco_devices.ini 03_ssh_key_auth/check_ssh_key_auth.yml
    ```
 
 2. **Check file permissions:**
@@ -148,14 +158,37 @@ This will:
 3. **Test SSH connection with verbose output:**
    ```bash
    ssh -v -i ~/.ssh/cisco_rsa ansible_admin@<device_ip_address>
-   ssh -v -i ~/.ssh/cisco_rsa lawi@<device_ip_address>
+   ```
+
+4. **Verify the key hash matches:**
+   ```bash
+   # Get the hash from your public key
+   ssh-keygen -lf ~/.ssh/cisco_rsa.pub -E md5
+
+   # Check the configured hash on the device
+   show running-config | include key-hash
    ```
 
 ### Common Issues
 
-- **"Invalid input detected"**: Ensure public key is properly folded to 64 characters per line
 - **"Permission denied"**: Check that the user has appropriate privileges on the network device
 - **"Incompatible ssh peer"**: Verify SSH client configuration includes `PubkeyAcceptedKeyTypes +ssh-rsa`
+- **Key hash mismatch**: Ensure the MD5 hash in the configuration matches your public key
+
+## How It Works
+
+Cisco IOS stores SSH public keys using their MD5 hash rather than the full key string. This approach:
+
+1. **Calculates the MD5 hash** of your SSH public key
+2. **Stores the hash** in the configuration under `ip ssh pubkey-chain`
+3. **Authenticates** by comparing the hash of the presented key during SSH login
+
+The configuration format is:
+```
+ip ssh pubkey-chain
+  username <username>
+   key-hash ssh-rsa <md5-hash> <comment>
+```
 
 ## Files Structure
 

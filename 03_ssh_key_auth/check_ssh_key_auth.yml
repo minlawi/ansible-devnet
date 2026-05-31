@@ -8,15 +8,15 @@
     username_to_manage: "{{ target_user | default('ansible_admin') }}"
   tasks:
 
-    - name: Show SSH pubkey-chain configuration
+    - name: Get running config
       cisco.ios.ios_command:
         commands:
-          - show running-config | section ip ssh pubkey-chain
-      register: ssh_pubkey_config
+          - show running-config
+      register: running_config
 
-    - name: Display SSH key configuration
+    - name: Display SSH pubkey-chain configuration
       ansible.builtin.debug:
-        msg: "{{ ssh_pubkey_config.stdout[0] }}"
+        msg: "{{ running_config.stdout[0].split('\n') | select('search', 'ansible_admin|pubkey|key-hash') | list }}"
 
     - name: Check for {{ username_to_manage }} user in running config
       cisco.ios.ios_command:
@@ -27,3 +27,11 @@
     - name: Display result for {{ username_to_manage }} user
       ansible.builtin.debug:
         msg: "{{ username_to_manage }} user {{ 'EXISTS' if admin_user_check.stdout[0] != '' else 'DOES NOT EXIST' }} on {{ actual_hostname }}"
+
+    - name: Verify SSH key is configured
+      ansible.builtin.set_fact:
+        ssh_key_configured: "{{ running_config.stdout[0] is search('key-hash ssh-rsa') }}"
+
+    - name: Display SSH key status
+      ansible.builtin.debug:
+        msg: "SSH public key for {{ username_to_manage }} is {{ 'CONFIGURED' if ssh_key_configured else 'NOT CONFIGURED' }} on {{ actual_hostname }}"

@@ -59,27 +59,34 @@
       delegate_to: localhost
       register: pubkey_content
 
-    - name: Fold public key to 64 characters per line
-      ansible.builtin.set_fact:
-        folded_pubkey: "{{ pubkey_content.content | b64decode | regex_replace('(.{64})', '\\1\n') }}"
+    - name: Get MD5 hash of public key
+      ansible.builtin.command:
+        cmd: "ssh-keygen -lf {{ pubkey_path }} -E md5"
+      become: false
+      delegate_to: localhost
+      register: key_hash_output
+      changed_when: false
 
-    - name: Display folded public key (for verification)
+    - name: Parse key hash and comment
+      ansible.builtin.set_fact:
+        key_hash: "{{ key_hash_output.stdout | regex_replace('.*MD5:([0-9a-f:]+).*', '\\1') | regex_replace(':', '') | upper }}"
+        key_comment: "{{ pubkey_content.content | b64decode | regex_replace('.* (.+)$', '\\1') | trim }}"
+
+    - name: Display key info (for verification)
       ansible.builtin.debug:
-        msg: "{{ folded_pubkey }}"
+        msg:
+          - "Key hash: {{ key_hash }}"
+          - "Comment: {{ key_comment }}"
       delegate_to: localhost
 
-    - name: Configure SSH public key using pubkey-chain
+    - name: Configure SSH public key using key-hash format
       cisco.ios.ios_config:
         lines:
-          - username {{ username_to_manage }}
-          - key-string
-          - "{{ folded_pubkey }}"
-          - exit
+          - "key-hash ssh-rsa {{ key_hash }} {{ key_comment }}"
         parents:
-          - ip ssh pubkey-chain
-        after:
-          - exit
-        save_when: never
+          - "ip ssh pubkey-chain"
+          - "username {{ username_to_manage }}"
+        save_when: always
 
     - name: Display SSH key configuration result
       ansible.builtin.debug:
