@@ -1,0 +1,100 @@
+---
+- name: Play with ios_interfaces module
+  hosts: R1
+  gather_facts: no
+
+  tasks:
+
+##### Gather all interfaces #####
+
+    # - name: Gather all interfaces
+    #   cisco.ios.ios_interfaces:
+    #     state: gathered
+    #   register: gathered_intf
+
+    # - name: Print all interfaces
+    #   ansible.builtin.debug:
+    #     msg: "{{ gathered_intf }}"
+
+##### Merge interface configuration ##### 
+##### Use Case: If you want to add a new interface config without affecting existing configuration, use state: merged
+
+    # - name: Configure interfaces and merge with existing configuration
+    #   cisco.ios.ios_interfaces:
+    #     config:
+    #       - name: GigabitEthernet0/3
+    #         description: "This is a merged testing interface"
+    #         enabled: true
+    #         mtu: 9200
+    #     state: merged
+    #   register: merged_intf
+
+    # - name: Print merged interfaces
+    #   ansible.builtin.debug:
+    #     msg: "{{ merged_intf }}"
+
+##### Replace interface configuration ##### 
+##### Use Case: If you want to replace the entire interface configuration, use state: replaced
+
+    # - name: Configure interfaces and replace existing configuration
+    #   cisco.ios.ios_interfaces:
+    #     config:
+    #       - name: GigabitEthernet0/3
+    #         description: "This is a replaced testing interface"
+    #         enabled: true
+    #         mtu: 1024
+    #     state: replaced
+    #   register: replaced_intf
+
+    # - name: Print replaced interfaces
+    #   ansible.builtin.debug:
+    #     msg: "{{ replaced_intf }}"
+
+##### Overridden interface configuration ##### 
+##### Use Case: This will override the interfaces configuration with the provided configuration
+##### and this will remove any interfaces that are not in the provided configuration.
+##### In this example, G0/1 and G0/2 existing configuration will be removed except IP address and shutdown state. 
+##### G0/3 configuration will be overridden with the provided configuration.
+
+    # - name: Configure interfaces and override existing configuration
+    #   cisco.ios.ios_interfaces:
+    #     config:
+    #       - name: GigabitEthernet0/0
+    #       - name: GigabitEthernet0/3
+    #         description: "This is an overridden testing interface"
+    #         enabled: true
+    #         mtu: 1024
+    #     state: overridden
+    #   register: overridden_intf
+
+    # - name: Print overridden interfaces
+    #   ansible.builtin.debug:
+    #     msg: "{{ overridden_intf }}"
+
+##### Template interface configuration ##### 
+
+    # - name: Configure interfaces from template with merged state
+    #   cisco.ios.ios_interfaces:
+    #     config:
+    #       - name: GigabitEthernet0/0
+    #         template: demo_template ## Need to pre-configured in the managed devices
+    #     state: merged
+    #   register: merged_intf
+
+    # - name: Print merged interfaces
+    #   ansible.builtin.debug:
+    #     msg: "{{ merged_intf }}"
+
+##### Purged interface configuration #####
+##### Use Case: This will remove (or delete) all unnecessary interfaces that are mentioned in the config.
+
+    - name: Delete or Remove interfaces 
+      cisco.ios.ios_interfaces:
+        config:
+          - name: Loopback1
+        state: purged
+      register: purged_intf
+
+    - name: Print purged interfaces
+      ansible.builtin.debug:
+        msg: "{{ purged_intf }}"

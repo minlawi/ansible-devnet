@@ -1,0 +1,66 @@
+---
+- name: Play with ios_hostname module
+  hosts: routers
+  gather_facts: false
+
+  tasks:
+
+##### Merged State Example #####
+
+    - name: Configure hostname
+      cisco.ios.ios_hostname:
+        config:
+          hostname: "{{ actual_hostname }}" # Value of "actual_hostname" variable should be defined in inventory or group_vars
+        state: merged
+      register: hostname_result
+
+    - name: Display "merged" result
+      ansible.builtin.debug:
+        msg: "{{ hostname_result }}"
+
+##### Gathered State Example #####
+
+#     - name: Gather current hostname
+#       cisco.ios.ios_hostname:
+#         state: gathered
+#       register: gathered_hostname
+
+#     - name: Display gathered hostname
+#       ansible.builtin.debug:
+#         msg: "{{ gathered_hostname }}"
+
+##### Rendered state Example #####
+
+#     - name: Render hostname # (rendered will transform the configuration in config option to platform specific CLI commands)
+#       cisco.ios.ios_hostname:
+#         config:
+#           hostname: "{{ actual_hostname }}" # Value of "actual_hostname" variable should be defined in inventory or group_vars
+#         state: rendered
+#       register: rendered_hostname
+
+#     - name: Display rendered hostname
+#       ansible.builtin.debug:
+#         msg: "{{ rendered_hostname }}"
+
+##### Parsed state Example #####
+
+    # - name: Parse hostname # (parsed will transform the platform specific CLI commands to structured data)
+    #   cisco.ios.ios_hostname:
+    #     running_config: "{{ lookup('file', '/home/lawi/ansible-devnet/golden_configs/{{ actual_hostname }}.cfg') }}" # Parse the running configuration file for the device, which should be located in the "golden_configs" directory and named after the value of "actual_hostname" variable with a .cfg extension
+    #     state: parsed
+    #   register: parsed_hostname
+
+    # - name: Display parsed hostname
+    #   ansible.builtin.debug:
+    #     msg: "{{ parsed_hostname }}"
+
+##### Deleted State Example #####
+
+    # - name: Delete hostname
+    #   cisco.ios.ios_hostname:
+    #     state: deleted
+    #   register: deleted_hostname
+
+    # - name: Display deleted hostname
+    #   ansible.builtin.debug:
+    #     msg: "{{ deleted_hostname }}"
