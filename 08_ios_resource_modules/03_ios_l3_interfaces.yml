@@ -1,0 +1,93 @@
+---
+- name: Play with ios_l3_interfaces module
+  hosts: R1
+  gather_facts: no
+
+  tasks:
+    - name: Gather all L3 interfaces ### This will be gathering the current config of the managed device. Not performing any configuration changes on the device.
+      cisco.ios.ios_l3_interfaces:
+        state: gathered
+      register: gathered_l3_intf
+
+    - name: Print all L3 interfaces
+      ansible.builtin.debug:
+        msg: "{{ gathered_l3_intf }}"
+
+    # - name: Parse all L3 interfaces from running config ### This will be parsing from the running config or given file. Not performing any configuration changes on the device.
+    #   cisco.ios.ios_l3_interfaces:
+    #     state: parsed
+    #     running_config: " {{ lookup('file', '/home/lawi/ansible-devnet/golden_configs/vIOS-R2.cfg')}}"
+    #   register: parsed_l3_intf
+
+    # - name: Print all L3 interfaces
+    #   ansible.builtin.debug:
+    #     msg: "{{ parsed_l3_intf }}"
+
+    # - name: Rendered L3 interfaces ### This will be rendering the config what will be actually applied on the managed device. Not performing any configuration changes on the device.
+    #   cisco.ios.ios_l3_interfaces:
+    #     state: rendered
+    #     config:
+    #       - name: GigabitEthernet0/1
+    #         ipv4:
+    #          - address: 192.168.1.1/24
+    #   register: rendered_l3_intf
+
+    # - name: Print rendered L3 interfaces
+    #   ansible.builtin.debug:
+    #     msg: "{{ rendered_l3_intf }}"
+
+    # - name: Merged L3 interfaces ### This will be merging the config with the current config on the managed device.
+    #   cisco.ios.ios_l3_interfaces:
+    #     state: merged
+    #     config:
+    #       - name: Loopback100
+    #         ipv4:
+    #          - address: 100.100.100.100/32
+    #   register: merged_l3_intf
+
+    # - name: Print merged L3 interfaces
+    #   ansible.builtin.debug:
+    #     msg: "{{ merged_l3_intf }}"
+
+    # - name: Replaced L3 interfaces ### This will be replacing the config with the current config on the managed device.
+    #   cisco.ios.ios_l3_interfaces:
+    #     state: replaced
+    #     config:
+    #       - name: Loopback100
+    #         ipv4:
+    #          - address: 100.100.100.200/32
+    #   register: replaced_l3_intf
+
+    # - name: Print replaced L3 interfaces
+    #   ansible.builtin.debug:
+    #     msg: "{{ replaced_l3_intf }}"
+
+    # - name: Deleted L3 interfaces ### This will be deleting the config from the current config on the managed device.
+    #   cisco.ios.ios_l3_interfaces:
+    #     state: deleted
+    #     config:
+    #       - name: Loopback100
+    #         ipv4:
+    #          - address: 100.100.100.100/32
+    #   register: deleted_l3_intf
+
+    # - name: Print deleted L3 interfaces
+    #   ansible.builtin.debug:
+    #     msg: "{{ deleted_l3_intf }}"
+
+    # - name: Overridden L3 interfaces
+    #   cisco.ios.ios_l3_interfaces:
+    #     state: overridden
+    #     config:
+    #       - name: GigabitEthernet0/0
+    #         ipv4:
+    #          - address: 192.168.2.189/24
+
+    #       - name: Loopback100
+    #         ipv4:
+    #          - address: 100.100.100.100/32
+    #   register: overridden_l3_intf
+
+    # - name: Print overridden L3 interfaces
+    #   ansible.builtin.debug:
+    #     msg: "{{ overridden_l3_intf }}"
