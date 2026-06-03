@@ -1,0 +1,39 @@
+---
+- name: Create SSH key-based authentication for user
+  hosts: routers
+  gather_facts: false
+
+  tasks:
+    - name: Check SSH key file exists or not
+      ansible.builtin.stat:
+        path: ~/.ssh/cisco_rsa.pub
+      delegate_to: localhost
+      register: ssh_key_stat
+
+    - name: Warn if SSH key file does not exist
+      ansible.builtin.debug:
+        msg: "WARNING: SSH public key file '~/.ssh/cisco_rsa.pub' not found on localhost. Please generate the key first using: ssh-keygen -t rsa -f ~/.ssh/cisco_rsa"
+      when: not ssh_key_stat.stat.exists | default(false)
+      delegate_to: localhost
+
+    - name: Create a new user with SSH key with no_log
+      cisco.ios.ios_user:
+        name: ansible_netview
+        sshkey: "{{ lookup('file', '~/.ssh/cisco_rsa.pub') }}"
+        state: present
+      register: user_result
+      no_log: true
+
+    # - name: Create multiple users with SSH key with no_log and aggregate options
+    #   cisco.ios.ios_user:
+    #     aggregate:
+    #       - name: ansible_netview
+    #       - name: ansible_netadmin
+    #     sshkey: "{{ lookup('file', '~/.ssh/cisco_rsa.pub') }}"
+    #     state: present
+    #   register: user_result
+    #   no_log: true
+
+    - name: Display the result of user creation
+      ansible.builtin.debug:
+        msg: "{{ user_result.changed }}"
