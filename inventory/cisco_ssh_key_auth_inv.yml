@@ -1,6 +1,6 @@
 all:
   children:
-    routers:
+    ios:
       vars:
         ansible_become: 'true'
         ansible_become_method: enable
@@ -9,9 +9,8 @@ all:
         ansible_network_os: cisco.ios.ios
         ansible_user: admin
         ansible_password: admin
-        ip_domain_name: from_inv_var.com
       children:
-        vios_group:
+        routers:
           vars:
             ansible_user: ansible_admin
             ansible_private_key_file: /home/lawi/.ssh/cisco_rsa
@@ -20,16 +19,21 @@ all:
             R1:
               actual_hostname: vIOS-R1
               ansible_host: 192.168.2.189
-              ip_domain_name: r1_var.com
             R2:
-              actual_hostname: vIOS-R2
+              actual_hostname: vIOS-R1
               ansible_host: 192.168.2.190
-              ip_domain_name: r2_var.com
             R3:
-              actual_hostname: vIOS-R3
+              actual_hostname: vIOS-R1
               ansible_host: 192.168.2.191
-              ip_domain_name: r3_var.com
             R4:
-              actual_hostname: vIOS-R4
+              actual_hostname: vIOS-R1
               ansible_host: 192.168.2.192
-              ip_domain_name: r4_var.com
+        switches:
+          vars:
+            # ansible_user: ansible_admin
+            # ansible_private_key_file: /home/lawi/.ssh/cisco_rsa
+            # ip_domain_name: from_inv_vios_group_var.com
+          hosts:
+            SW1:
+              actual_hostname: OOB-SW1
+              ansible_host: 192.168.2.199
