@@ -27,7 +27,9 @@
         # tags: trunk
 
 #### STP, BPDU, ROOTGUARD ### NOT WORKING ### Use cisco.ios.ios_config module instead.
-#### This STP bpdufilter & bpduguard got issue #### Ref: https://github.com/ansible-collections/cisco.ios/issues/1285
+#### This STP bpdufilter & bpduguard got issue #### 
+#### Ref: https://github.com/ansible-collections/cisco.ios/issues/1285
+#### https://github.com/ansible-collections/cisco.ios/pull/1249
 
     # - name: NOT WORKING TASK
     #   cisco.ios.ios_l2_interfaces:
