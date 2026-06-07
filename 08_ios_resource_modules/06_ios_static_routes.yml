@@ -1,0 +1,27 @@
+---
+- name: Play Static route
+  hosts: R1
+  gather_facts: false
+
+  tasks:
+    - name: Add new static route
+      cisco.ios.static_routes:
+        config:
+          - address_families:
+              - afi: ipv4
+                routes:
+                  - dest: 0.0.0.0/0
+                    next_hops:
+                      - forward_router_address: 10.10.10.2
+                        # distance_metric: 10 # Optional
+                        name: SR1
+        state: merged
+      register: add_static_route
+
+    - name: Print results
+      ansible.builtin.debug:
+        msg: "{{ add_static_route}}"
+
+### state: merged -- It will only add the new config. Existing config will not be impacted. (Recommended)
+### state: overridden -- It will delete the all static route config except the config we defined in the playbook. Existing config will be impacted.
+### state: replaced -- It will replace with the new config we defined in the playbook. Existing config will not be impacted.
