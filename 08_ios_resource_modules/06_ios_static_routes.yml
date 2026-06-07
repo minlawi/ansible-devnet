@@ -22,6 +22,6 @@
       ansible.builtin.debug:
         msg: "{{ add_static_route}}"
 
-### state: merged -- It will only add the new config. Existing config will not be impacted. (Recommended)
+### state: merged     -- It will only add the new config. Existing config will not be impacted. (Recommended)
 ### state: overridden -- It will delete the all static route config except the config we defined in the playbook. Existing config will be impacted.
-### state: replaced -- It will replace with the new config we defined in the playbook. Existing config will not be impacted.
+### state: replaced   -- It will replace with the new config we defined in the playbook. Existing config will not be impacted.
