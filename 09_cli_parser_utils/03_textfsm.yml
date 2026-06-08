@@ -1,0 +1,18 @@
+---
+- name: TextFSM Parser Demo
+  hosts: R3
+  gather_facts: false
+  tasks:
+    - name: Version parser with TextFSM
+      ansible.utils.cli_parse:
+        command: show version
+        parser:
+          name: ansible.utils.textfsm
+          # template_path: /home/lawi/ansible-devnet/09_cli_parser_utils/templates/ios_show_version_demo.textfsm
+        set_fact: sh_ver
+      register: show_ver_parser
+
+    - name: Print show version
+      ansible.builtin.debug:
+        msg: 
+          - "{{ sh_ver }}"
