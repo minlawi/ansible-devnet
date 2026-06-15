@@ -1,8 +1,8 @@
 mgmt_int_list:
   IOSv:
     name: GigabitEthernet0/0
-    description: ""
+    description: IOSv desc from var file
 
   CSR100V:
     name: GigabitEthernet1
-    description: ""
+    description: CSR1000v desc from var file

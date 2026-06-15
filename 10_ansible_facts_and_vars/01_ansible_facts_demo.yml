@@ -35,7 +35,7 @@
           - name: "{{ mgmt_int_list.get(ansible_facts.net_model).name }}"
             description: "{{ mgmt_int_list.get(ansible_facts.net_model).description }}"
             enabled: true
-        state: replaced
+        state: merged
       register: int_conf
 
     - debug: msg="{{ int_conf }}"
