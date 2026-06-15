@@ -1,0 +1,41 @@
+---
+- name: Ansible facts demo
+  hosts: routers
+  tasks:
+    # - name: Print ansbile facts
+    #   ansible.builtin.debug:
+    #     msg:
+    #       - "{{ ansible_facts }}"
+    # #       - "{{ ansible_facts.interfaces }}"
+
+    # - name: Configure IOS interface
+    #   when: ansible_facts.net_model == "IOSv"
+    #   cisco.ios.ios_interfaces:
+    #     config:
+    #       - name: GigabitEthernet0/0
+    #         description: ""
+    #         enabled: true
+    #   register: int_conf
+
+    # - debug: msg="{{ int_conf }}"
+
+    # - name: Configure Routers ## Directly defined the variable values from group_vars/routers/mgmt_intf.yml file.
+    #   cisco.ios.ios_interfaces:
+    #     config:
+    #       - name: "{{ mgmt_int_list.IOSv.name }}"
+    #         description: "{{ mgmt_int_list.IOSv.description }}"
+    #         enabled: true
+    #   register: int_conf
+
+    # - debug: msg="{{ int_conf }}"
+
+    - name: Configure Routers ## Dynamically retrieve variable values using get() method based on ansible_facts.net_model
+      cisco.ios.ios_interfaces:
+        config:
+          - name: "{{ mgmt_int_list.get(ansible_facts.net_model).name }}"
+            description: "{{ mgmt_int_list.get(ansible_facts.net_model).description }}"
+            enabled: true
+        state: replaced
+      register: int_conf
+
+    - debug: msg="{{ int_conf }}"

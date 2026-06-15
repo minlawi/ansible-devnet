@@ -1,0 +1,8 @@
+mgmt_int_list:
+  IOSv:
+    name: GigabitEthernet0/0
+    description: ""
+
+  CSR100V:
+    name: GigabitEthernet1
+    description: ""
