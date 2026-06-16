@@ -1,0 +1,21 @@
+---
+- name: Ansible Play vars demo
+  hosts: R4
+  gather_facts: false
+  vars:
+    ntp_server: 1.1.1.1
+    tacacs_server:
+      - 11.11.11.11
+      - 11.11.11.12
+  vars_files:
+    - vars/routers.yml
+  tasks:
+    - name: Print variables
+      ansible.builtin.debug:
+        msg:
+          - "{{ inventory_hostname }}"
+          - "{{ ntp_server }}"
+          - "{{ tacacs_server }}"
+
+
+## Note: vars_files takes precedence over vars when the same variable is defined in both places.
