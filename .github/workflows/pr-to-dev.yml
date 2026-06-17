@@ -1,0 +1,50 @@
+name: PR to Dev Branch
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+permissions:
+  contents: read
+
+jobs:
+  validate-feature-pr:
+    # Only run for PRs from feature/* branches
+    if: startsWith(github.head_ref, 'feature/')
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Ansible Playbook
+        run: |
+          ansible-playbook 07_ios_config_demo/05_src_demo.yml
+
+      # - name: Install Ansible
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     pip install ansible ansible-lint
+
+      # - name: Validate Ansible playbook syntax
+      #   run: |
+      #     # Find all .yml and .yaml files and validate syntax
+      #     for playbook in $(find . -name "*.yml" -o -name "*.yaml" | grep -v '.github'); do
+      #       echo "Validating $playbook..."
+      #       ansible-playbook "$playbook" --syntax-check || true
+      #     done
+
+      # - name: Run Ansible Lint
+      #   run: |
+      #     # Run ansible-lint on the repository
+      #     ansible-lint --force-color --parseable || true
+
+      # - name: PR Summary
+      #   run: |
+      #     echo "## PR Details 📋" >> $GITHUB_STEP_SUMMARY
+      #     echo "" >> $GITHUB_STEP_SUMMARY
+      #     echo "- **Source Branch:** \`${{ github.head_ref }}\`" >> $GITHUB_STEP_SUMMARY
+      #     echo "- **Target Branch:** \`${{ github.base_ref }}\`" >> $GITHUB_STEP_SUMMARY
+      #     echo "- **PR Number:** #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+      #     echo "- **Author:** @${{ github.event.pull_request.user.login }}" >> $GITHUB_STEP_SUMMARY
